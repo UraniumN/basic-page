@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<title>WikiQuest — Wikipedia Racing Game</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    (function() {
+        var colorKeys = [
+            "primary-fixed","surface","on-surface-variant","tertiary-container",
+            "on-error","on-secondary-container","inverse-primary","secondary",
+            "tertiary-fixed","primary-container","on-primary-fixed",
+            "on-tertiary-container","on-tertiary-fixed","inverse-surface",
+            "surface-tint","error","on-secondary-fixed","surface-container-high",
+            "surface-container-highest","outline","background",
+            "on-secondary-fixed-variant","secondary-dim","on-primary-container",
+            "surface-container-lowest","primary","on-surface","primary-dim",
+            "error-dim","tertiary-fixed-dim","surface-dim","on-tertiary",
+            "surface-container-low","on-primary","on-background","on-secondary",
+            "surface-bright","outline-variant","inverse-on-surface","tertiary",
+            "secondary-fixed-dim","primary-fixed-dim","tertiary-dim",
+            "secondary-container","secondary-fixed","surface-container",
+            "on-primary-fixed-variant","on-tertiary-fixed-variant",
+            "on-error-container","surface-variant","error-container"
+        ];
+        var colors = {};
+        colorKeys.forEach(function(k) {
+            colors[k] = "rgb(var(--c-" + k + ") / <alpha-value>)";
+        });
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: colors,
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        };
+    })();
+</script>
+<style>
+    :root {
+        /* Nebula theme defaults (RGB triplets for Tailwind opacity support) */
+        --c-primary-fixed: 171 143 254;
+        --c-surface: 6 14 32;
+        --c-on-surface-variant: 163 170 196;
+        --c-tertiary-container: 107 255 193;
+        --c-on-error: 73 0 19;
+        --c-on-secondary-container: 246 247 255;
+        --c-inverse-primary: 104 76 182;
+        --c-secondary: 100 168 254;
+        --c-tertiary-fixed: 107 255 193;
+        --c-primary-container: 171 143 254;
+        --c-on-primary-fixed: 0 0 0;
+        --c-on-tertiary-container: 0 96 66;
+        --c-on-tertiary-fixed: 0 75 51;
+        --c-inverse-surface: 250 248 255;
+        --c-surface-tint: 183 159 255;
+        --c-error: 255 110 132;
+        --c-on-secondary-fixed: 0 53 99;
+        --c-surface-container-high: 20 31 56;
+        --c-surface-container-highest: 25 37 64;
+        --c-outline: 109 117 140;
+        --c-background: 6 14 32;
+        --c-on-secondary-fixed-variant: 0 82 148;
+        --c-secondary-dim: 91 160 245;
+        --c-on-primary-container: 41 0 112;
+        --c-surface-container-lowest: 0 0 0;
+        --c-primary: 183 159 255;
+        --c-on-surface: 222 229 255;
+        --c-primary-dim: 168 140 251;
+        --c-error-dim: 215 51 87;
+        --c-tertiary-fixed-dim: 90 240 180;
+        --c-surface-dim: 6 14 32;
+        --c-on-tertiary: 0 105 72;
+        --c-surface-container-low: 9 19 40;
+        --c-on-primary: 54 16 131;
+        --c-on-background: 222 229 255;
+        --c-on-secondary: 0 40 78;
+        --c-surface-bright: 31 43 73;
+        --c-outline-variant: 64 72 93;
+        --c-inverse-on-surface: 77 85 107;
+        --c-tertiary: 205 255 227;
+        --c-secondary-fixed-dim: 159 198 255;
+        --c-primary-fixed-dim: 157 129 240;
+        --c-tertiary-dim: 90 240 180;
+        --c-secondary-container: 0 96 172;
+        --c-secondary-fixed: 183 211 255;
+        --c-surface-container: 15 25 48;
+        --c-on-primary-fixed-variant: 51 11 128;
+        --c-on-tertiary-fixed-variant: 0 107 74;
+        --c-on-error-container: 255 178 185;
+        --c-surface-variant: 25 37 64;
+        --c-error-container: 167 1 56;
+        /* Non-Tailwind theming variables */
+        --glow-color: 171, 143, 254;
+        --glass-bg: rgba(25, 37, 64, 0.6);
+        --particle-color-1: #ab8ffe;
+        --particle-color-2: #64a8fe;
+        --link-color: #64a8fe;
+        --link-hover-color: #b79fff;
+        --accent-color: #a78bfa;
+    }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glow-primary {
+        box-shadow: 0 0 20px rgba(var(--glow-color), 0.2);
+    }
+    .glass-panel {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+    }
+    .screen { display: none !important; }
+    .screen.active { display: block !important; }
+    #win-screen.active { display: flex !important; }
+    
+    /* Wikipedia Article Styling Overrides */
+    #article-content a { color: var(--link-color); text-decoration: underline; text-decoration-color: rgba(100, 168, 254, 0.3); transition: color 0.3s; }
+    #article-content a:hover { color: var(--link-hover-color); text-decoration-color: var(--link-hover-color); }
+    #article-content .disabled-link { color: #6d758c; text-decoration: none; cursor: default; pointer-events: none; }
+    #article-content .infobox, #article-content .sidebar { 
+        float: right; clear: right; width: 22em; margin: 0.5em 0 1em 1em; 
+        background: rgba(25, 37, 64, 0.4); border: 1px solid rgba(109, 117, 140, 0.2); 
+        padding: 1rem; border-radius: 1rem; font-size: 0.85rem;
+    }
+    #article-content table { width: 100%; border-collapse: collapse; margin: 1em 0; background: rgba(0,0,0,0.1); }
+    #article-content th, #article-content td { padding: 0.5em; border: 1px solid rgba(109, 117, 140, 0.2); text-align: left; }
+    #article-content .mw-editsection, #article-content .navbox, #article-content .metadata { display: none !important; }
+    
+    .loading-overlay { display: none; }
+    .loading-overlay.visible { display: flex; }
+
+    /* Theme dropdown (click-based for mobile support) */
+    .theme-dropdown-menu {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+    .theme-dropdown-menu.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .confetti-piece {
+        position: absolute;
+        width: 8px; height: 8px;
+        border-radius: 2px;
+        animation: confetti-fall 1.8s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+        0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translateY(350px) rotate(720deg) scale(0); opacity: 0; }
+    }
+</style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 selection:text-primary-fixed">
+<div class="fixed inset-0 pointer-events-none z-0" id="particles"></div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-20 bg-surface-container-low/60 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] bg-gradient-to-b from-outline-variant/20 to-transparent">
+<div class="flex items-center gap-8">
+<h1 class="text-2xl font-black text-on-surface tracking-tighter font-headline cursor-pointer" onclick="location.reload()">WikiQuest</h1>
+<nav class="hidden md:flex gap-6 font-headline font-bold tracking-tight">
+<a class="pb-1 transition-all duration-300" href="#" style="color: var(--accent-color); border-bottom: 2px solid var(--accent-color);">Nebula</a>
+<a class="text-on-surface/70 hover:text-on-surface transition-all duration-300" href="#">Cyberpunk</a>
+<a class="text-on-surface/70 hover:text-on-surface transition-all duration-300" href="#">Emerald</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative" id="theme-dropdown-container">
+<button class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-container-highest border border-outline-variant/20 hover:border-primary/50 transition-all" id="theme-dropdown-btn">
+<span class="text-sm font-medium" id="theme-label">Theme: Nebula</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="absolute right-0 mt-2 w-48 glass-panel rounded-xl overflow-hidden border border-outline-variant/20 theme-dropdown-menu" id="theme-dropdown-menu">
+<div class="p-2 space-y-1" id="theme-dropdown-options">
+<button class="w-full text-left px-3 py-2 rounded-lg bg-primary/10 text-primary-fixed text-sm" data-theme="nebula">Nebula</button>
+<button class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-sm" data-theme="cyberpunk">Cyberpunk</button>
+<button class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-sm" data-theme="emerald">Emerald</button>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface/70 hover:text-on-surface cursor-pointer">settings</span>
+<span class="material-symbols-outlined text-on-surface/70 hover:text-on-surface cursor-pointer">account_circle</span>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col py-8 gap-4 h-screen w-64 fixed left-0 top-0 bg-surface/80 backdrop-blur-2xl border-r border-outline-variant/15 shadow-2xl z-40 pt-24">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary p-0.5">
+<img alt="Player Avatar" class="w-full h-full rounded-full bg-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAguAvnzhxlh1yWwRltzvruPv52lB2QEOJd4r-4LwoJnJocFsQTJ0oS9yy_ZZ0BKlaNVQ3rdcwjByWyrs-ysDLiHrscIA60J7rE9pJHT11gfnSl_-Ng8znMWS9Mk_A7_SBHmd2j1dTBGGUll703VAbh0jlPxOSJ2P2gl-riGwfHC4oBMrJYoDI9PmnWjjUStnlX4uPg5TpAWEp91oEaVS6KI8wZStO7TT2XzLAmjSapHllIEw2n7NgTRG3nGrRSqubrgO1zO3JZlQ"/>
+</div>
+<div>
+<p class="font-headline text-primary text-xs font-bold uppercase tracking-widest">Celestial Explorer</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Rank: Nebula Master</p>
+</div>
+</div>
+<button class="w-full py-3 px-4 bg-primary-container text-on-primary-container font-headline font-bold text-xs uppercase tracking-widest rounded-xl shadow-[0_0_15px_rgba(171,143,254,0.3)] hover:scale-105 transition-transform" id="sidebar-new-game-btn">
+            New Game
+        </button>
+</div>
+<nav class="flex flex-col gap-1">
+<button class="flex items-center gap-4 px-6 py-4 bg-primary/10 text-primary border-r-4 border-primary font-headline text-sm uppercase tracking-widest text-left w-full" onclick="window.location.reload()">
+<span class="material-symbols-outlined">home</span>
+            Home
+        </button>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface/50 hover:bg-surface-container hover:text-on-surface hover:pl-8 transition-all duration-300 font-headline text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+            Challenges
+        </a>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface/50 hover:bg-surface-container hover:text-on-surface hover:pl-8 transition-all duration-300 font-headline text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+            Leaderboard
+        </a>
+<a class="flex items-center gap-4 px-6 py-4 text-on-surface/50 hover:bg-surface-container hover:text-on-surface hover:pl-8 transition-all duration-300 font-headline text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined">rebase_edit</span>
+            Wiki Path
+        </a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="md:ml-64 pt-24 pb-32 px-6 min-h-screen relative z-10">
+<!-- Start Screen -->
+<section class="screen active max-w-4xl mx-auto space-y-12 mb-20" id="start-screen">
+<div class="relative overflow-hidden rounded-[2.5rem] p-12 bg-surface-container-low border border-outline-variant/10 shadow-2xl">
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 blur-[100px] rounded-full"></div>
+<div class="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary/10 blur-[100px] rounded-full"></div>
+<div class="relative z-10 flex flex-col md:flex-row gap-12 items-center">
+<div class="flex-1 space-y-6 text-center md:text-left">
+<span class="px-4 py-1.5 rounded-full bg-primary/20 text-primary-fixed text-xs font-bold uppercase tracking-widest border border-primary/30">New Mission Available</span>
+<h2 class="text-5xl md:text-6xl font-black font-headline text-on-surface leading-none tracking-tighter">
+                        Quantum <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Linkage</span>
+</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-md">
+                        Start from <strong class="text-on-surface" id="start-title">Loading...</strong> and reach <strong class="text-on-surface" id="target-title">Loading...</strong> in the fewest clicks possible.
+                    </p>
+<div class="flex flex-wrap gap-4 justify-center md:justify-start">
+<button class="px-8 py-4 bg-primary-fixed text-on-primary-fixed font-headline font-bold rounded-xl hover:shadow-[0_0_30px_rgba(171,143,254,0.4)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="start-btn">
+                            Initiate Quest
+                        </button>
+<button class="px-8 py-4 glass-panel border border-outline-variant/30 text-on-surface font-headline font-bold rounded-xl hover:bg-surface-container-highest transition-all" id="new-articles-btn">
+                            Re-route Path
+                        </button>
+</div>
+</div>
+<div class="w-full md:w-72 aspect-square glass-panel rounded-3xl border border-white/10 flex flex-col items-center justify-center p-8 gap-4 shadow-inner">
+<span class="material-symbols-outlined text-6xl text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<div class="text-center">
+<p class="text-xs text-on-surface-variant uppercase tracking-widest mb-1">Estimated Difficulty</p>
+<p class="text-2xl font-black font-headline">Legendary</p>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
+<div class="w-4/5 h-full bg-gradient-to-r from-primary to-secondary"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Game Screen -->
+<section class="screen max-w-6xl mx-auto space-y-0" id="game-screen">
+<!-- Sticky Top Bar: Trajectory Log + Destination Target + Stats -->
+<div class="sticky top-20 z-30 pb-4 bg-surface/80 backdrop-blur-xl" id="game-top-bar">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+<!-- Destination Target -->
+<div class="md:col-span-4 bg-surface-container-highest rounded-2xl p-5 border border-primary/20 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent"></div>
+<div class="relative z-10 flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-xl" style="font-variation-settings: 'FILL' 1;">flag</span>
+</div>
+<div class="min-w-0">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Destination</p>
+<h5 class="text-lg font-black font-headline truncate" id="game-target-title">Target Article</h5>
+</div>
+</div>
+</div>
+<!-- Trajectory Log -->
+<div class="md:col-span-5 bg-surface-container rounded-2xl p-5 border border-outline-variant/10">
+<h4 class="font-headline font-bold text-[10px] uppercase tracking-widest text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">rebase_edit</span>
+                        Trajectory Log
+                    </h4>
+<div class="overflow-x-auto overflow-y-hidden" id="path-bar">
+<div class="flex items-center gap-2 flex-nowrap" id="path-items">
+<!-- Breadcrumb items populated here -->
+</div>
+</div>
+</div>
+<!-- Stats + Terminate -->
+<div class="md:col-span-3 flex flex-col gap-3">
+<div class="flex gap-2 items-center">
+<span class="px-3 py-2 rounded-xl bg-surface-container-highest border border-outline-variant/20 text-xs text-on-surface-variant flex-1 text-center"><span id="click-count">0</span> Clicks</span>
+<span class="px-3 py-2 rounded-xl bg-surface-container-highest border border-outline-variant/20 text-xs text-on-surface-variant flex-1 text-center" id="timer">0:00</span>
+</div>
+<button class="w-full py-2.5 glass-panel border border-error/20 text-error font-headline font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-error/10 transition-all flex items-center justify-center gap-2" id="back-btn">
+<span class="material-symbols-outlined text-sm">close</span> Terminate
+                    </button>
+</div>
+</div>
+</div>
+<!-- Article Content -->
+<div class="mt-4">
+<div class="glass-panel rounded-[2rem] p-1 border border-outline-variant/20 shadow-2xl relative">
+<!-- Loading Overlay -->
+<div class="loading-overlay absolute inset-0 z-50 bg-surface/80 backdrop-blur-sm rounded-[1.9rem] flex-col items-center justify-center gap-4" id="loading-overlay">
+<div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+<span class="font-headline font-bold text-primary tracking-widest uppercase text-xs">Phasing Through Data...</span>
+</div>
+<div class="bg-surface-container-low rounded-[1.9rem] p-8 md:p-12 min-h-[600px]">
+<header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h3 class="text-4xl font-black font-headline mb-2 text-on-surface" id="current-article-title">Article Title</h3>
+<p class="text-on-surface-variant font-label text-sm italic tracking-wide">From Wikipedia, the free encyclopedia</p>
+</div>
+</header>
+<article class="prose prose-invert max-w-none text-on-surface-variant leading-relaxed space-y-6" id="article-content">
+<!-- Article dynamic content here -->
+</article>
+</div>
+</div>
+</div>
+</section>
+<!-- Win Screen -->
+<section class="screen fixed inset-0 z-[100] bg-surface/90 backdrop-blur-md flex items-center justify-center p-6" id="win-screen">
+<div class="max-w-2xl w-full glass-panel rounded-[3rem] p-12 text-center border border-primary/30 shadow-[0_0_80px_rgba(171,143,254,0.15)] relative overflow-hidden">
+<div class="absolute inset-0 pointer-events-none" id="confetti-burst"></div>
+<div class="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-8">
+<span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<h2 class="text-5xl font-black font-headline text-on-surface mb-4">Nexus Reached</h2>
+<p class="text-on-surface-variant text-lg mb-10">You've successfully bridged the gap in the digital ether.</p>
+<div class="grid grid-cols-3 gap-4 mb-10">
+<div class="bg-surface-container-low rounded-2xl py-4">
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Time</p>
+<p class="text-xl font-bold font-headline" id="win-time">0:00</p>
+</div>
+<div class="bg-surface-container-low rounded-2xl py-4">
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Clicks</p>
+<p class="text-xl font-bold font-headline" id="win-clicks">0</p>
+</div>
+<div class="bg-surface-container-low rounded-2xl py-4">
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Rank</p>
+<p class="text-xl font-bold font-headline">S</p>
+</div>
+</div>
+<div class="mb-10 text-left">
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest mb-4">Final Path</p>
+<div class="flex flex-wrap gap-2 text-xs" id="win-path-items">
+<!-- Win path items -->
+</div>
+</div>
+<div class="flex flex-col md:flex-row gap-4 justify-center">
+<button class="px-10 py-4 bg-primary-fixed text-on-primary-fixed font-headline font-bold rounded-xl shadow-lg hover:scale-105 transition-transform" id="play-again-btn">New Challenge</button>
+<button class="px-10 py-4 glass-panel border border-outline-variant/30 text-on-surface font-headline font-bold rounded-xl">Share Journey</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-surface-container-low/70 backdrop-blur-lg border-t border-outline-variant/20 shadow-[0_-10px_40px_rgba(167,139,250,0.1)] rounded-t-[2rem]">
+<button class="flex flex-col items-center justify-center bg-primary/20 text-primary rounded-2xl px-6 py-2 shadow-[0_0_15px_rgba(171,143,254,0.3)] transition-all active:scale-110" onclick="window.location.reload()">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] text-[10px] font-bold">Quest</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface/40 hover:text-primary transition-all">
+<span class="material-symbols-outlined">insights</span>
+<span class="font-['Inter'] text-[10px] font-bold">Stats</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface/40 hover:text-primary transition-all">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-['Inter'] text-[10px] font-bold">Inventory</span>
+</button>
+</nav>
+<!-- FAB -->
+<button class="fixed bottom-24 right-8 w-16 h-16 bg-primary-container text-on-primary-container rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform md:bottom-8 md:right-8 z-50" id="fab-play">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<script>
+    (() => {
+        'use strict';
+
+        const API_BASE = 'https://en.wikipedia.org/w/api.php';
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => document.querySelectorAll(sel);
+
+        /* =========================================================
+           THEME SYSTEM
+           ========================================================= */
+
+        // Convert hex color to RGB triplet string for CSS variables
+        function hexToRgb(hex) {
+            const h = hex.replace('#', '');
+            return parseInt(h.substring(0, 2), 16) + ' ' +
+                   parseInt(h.substring(2, 4), 16) + ' ' +
+                   parseInt(h.substring(4, 6), 16);
+        }
+
+        const THEMES = {
+            nebula: {
+                label: 'Nebula',
+                cssVars: {
+                    '--glow-color': '171, 143, 254',
+                    '--glass-bg': 'rgba(25, 37, 64, 0.6)',
+                    '--particle-color-1': '#ab8ffe',
+                    '--particle-color-2': '#64a8fe',
+                    '--link-color': '#64a8fe',
+                    '--link-hover-color': '#b79fff',
+                    '--accent-color': '#a78bfa',
+                },
+                tailwind: {
+                    "primary-fixed": "#ab8ffe",
+                    "surface": "#060e20",
+                    "on-surface-variant": "#a3aac4",
+                    "tertiary-container": "#6bffc1",
+                    "on-error": "#490013",
+                    "on-secondary-container": "#f6f7ff",
+                    "inverse-primary": "#684cb6",
+                    "secondary": "#64a8fe",
+                    "tertiary-fixed": "#6bffc1",
+                    "primary-container": "#ab8ffe",
+                    "on-primary-fixed": "#000000",
+                    "on-tertiary-container": "#006042",
+                    "on-tertiary-fixed": "#004b33",
+                    "inverse-surface": "#faf8ff",
+                    "surface-tint": "#b79fff",
+                    "error": "#ff6e84",
+                    "on-secondary-fixed": "#003563",
+                    "surface-container-high": "#141f38",
+                    "surface-container-highest": "#192540",
+                    "outline": "#6d758c",
+                    "background": "#060e20",
+                    "on-secondary-fixed-variant": "#005294",
+                    "secondary-dim": "#5ba0f5",
+                    "on-primary-container": "#290070",
+                    "surface-container-lowest": "#000000",
+                    "primary": "#b79fff",
+                    "on-surface": "#dee5ff",
+                    "primary-dim": "#a88cfb",
+                    "error-dim": "#d73357",
+                    "tertiary-fixed-dim": "#5af0b4",
+                    "surface-dim": "#060e20",
+                    "on-tertiary": "#006948",
+                    "surface-container-low": "#091328",
+                    "on-primary": "#361083",
+                    "on-background": "#dee5ff",
+                    "on-secondary": "#00284e",
+                    "surface-bright": "#1f2b49",
+                    "outline-variant": "#40485d",
+                    "inverse-on-surface": "#4d556b",
+                    "tertiary": "#cdffe3",
+                    "secondary-fixed-dim": "#9fc6ff",
+                    "primary-fixed-dim": "#9d81f0",
+                    "tertiary-dim": "#5af0b4",
+                    "secondary-container": "#0060ac",
+                    "secondary-fixed": "#b7d3ff",
+                    "surface-container": "#0f1930",
+                    "on-primary-fixed-variant": "#330b80",
+                    "on-tertiary-fixed-variant": "#006b4a",
+                    "on-error-container": "#ffb2b9",
+                    "surface-variant": "#192540",
+                    "error-container": "#a70138"
+                },
+                confettiColors: ['#ab8ffe', '#64a8fe', '#6bffc1', '#ff6e84'],
+            },
+            cyberpunk: {
+                label: 'Cyberpunk',
+                cssVars: {
+                    '--glow-color': '255, 0, 102',
+                    '--glass-bg': 'rgba(30, 10, 40, 0.7)',
+                    '--particle-color-1': '#ff0066',
+                    '--particle-color-2': '#00ffff',
+                    '--link-color': '#00ffff',
+                    '--link-hover-color': '#ff0066',
+                    '--accent-color': '#ff0066',
+                },
+                tailwind: {
+                    "primary-fixed": "#ff0066",
+                    "surface": "#0a0a12",
+                    "on-surface-variant": "#b0a8c0",
+                    "tertiary-container": "#ffe600",
+                    "on-error": "#490013",
+                    "on-secondary-container": "#e0ffff",
+                    "inverse-primary": "#cc0052",
+                    "secondary": "#00ffff",
+                    "tertiary-fixed": "#ffe600",
+                    "primary-container": "#ff0066",
+                    "on-primary-fixed": "#000000",
+                    "on-tertiary-container": "#665c00",
+                    "on-tertiary-fixed": "#4d4500",
+                    "inverse-surface": "#f0f0ff",
+                    "surface-tint": "#ff3385",
+                    "error": "#ff4444",
+                    "on-secondary-fixed": "#004d4d",
+                    "surface-container-high": "#1a1225",
+                    "surface-container-highest": "#221830",
+                    "outline": "#6b5f7d",
+                    "background": "#0a0a12",
+                    "on-secondary-fixed-variant": "#007a7a",
+                    "secondary-dim": "#00cccc",
+                    "on-primary-container": "#33001a",
+                    "surface-container-lowest": "#050508",
+                    "primary": "#ff3385",
+                    "on-surface": "#e8e0f0",
+                    "primary-dim": "#e6005c",
+                    "error-dim": "#cc3333",
+                    "tertiary-fixed-dim": "#ccb800",
+                    "surface-dim": "#0a0a12",
+                    "on-tertiary": "#665c00",
+                    "surface-container-low": "#100c18",
+                    "on-primary": "#4d0033",
+                    "on-background": "#e8e0f0",
+                    "on-secondary": "#003333",
+                    "surface-bright": "#2a1e3a",
+                    "outline-variant": "#4a3d5d",
+                    "inverse-on-surface": "#555060",
+                    "tertiary": "#fff580",
+                    "secondary-fixed-dim": "#80ffff",
+                    "primary-fixed-dim": "#e6005c",
+                    "tertiary-dim": "#ccb800",
+                    "secondary-container": "#008080",
+                    "secondary-fixed": "#b3ffff",
+                    "surface-container": "#141020",
+                    "on-primary-fixed-variant": "#4d0033",
+                    "on-tertiary-fixed-variant": "#665c00",
+                    "on-error-container": "#ffb2b2",
+                    "surface-variant": "#1a1225",
+                    "error-container": "#990033"
+                },
+                confettiColors: ['#ff0066', '#00ffff', '#ffe600', '#ff4444'],
+            },
+            emerald: {
+                label: 'Emerald',
+                cssVars: {
+                    '--glow-color': '16, 185, 129',
+                    '--glass-bg': 'rgba(10, 35, 25, 0.6)',
+                    '--particle-color-1': '#10b981',
+                    '--particle-color-2': '#f59e0b',
+                    '--link-color': '#34d399',
+                    '--link-hover-color': '#fbbf24',
+                    '--accent-color': '#10b981',
+                },
+                tailwind: {
+                    "primary-fixed": "#10b981",
+                    "surface": "#061210",
+                    "on-surface-variant": "#94b8a8",
+                    "tertiary-container": "#fbbf24",
+                    "on-error": "#490013",
+                    "on-secondary-container": "#f0fdf4",
+                    "inverse-primary": "#059669",
+                    "secondary": "#f59e0b",
+                    "tertiary-fixed": "#fbbf24",
+                    "primary-container": "#10b981",
+                    "on-primary-fixed": "#000000",
+                    "on-tertiary-container": "#78590b",
+                    "on-tertiary-fixed": "#5c4408",
+                    "inverse-surface": "#f0fdf4",
+                    "surface-tint": "#34d399",
+                    "error": "#f87171",
+                    "on-secondary-fixed": "#5c4408",
+                    "surface-container-high": "#0e2a20",
+                    "surface-container-highest": "#14352a",
+                    "outline": "#5d7d6e",
+                    "background": "#061210",
+                    "on-secondary-fixed-variant": "#8a6a10",
+                    "secondary-dim": "#d97706",
+                    "on-primary-container": "#022c22",
+                    "surface-container-lowest": "#020a08",
+                    "primary": "#34d399",
+                    "on-surface": "#d1fae5",
+                    "primary-dim": "#059669",
+                    "error-dim": "#dc2626",
+                    "tertiary-fixed-dim": "#d97706",
+                    "surface-dim": "#061210",
+                    "on-tertiary": "#78590b",
+                    "surface-container-low": "#091e18",
+                    "on-primary": "#064e3b",
+                    "on-background": "#d1fae5",
+                    "on-secondary": "#3b2506",
+                    "surface-bright": "#1a4035",
+                    "outline-variant": "#355448",
+                    "inverse-on-surface": "#3b5949",
+                    "tertiary": "#fef3c7",
+                    "secondary-fixed-dim": "#fbbf24",
+                    "primary-fixed-dim": "#059669",
+                    "tertiary-dim": "#d97706",
+                    "secondary-container": "#b45309",
+                    "secondary-fixed": "#fde68a",
+                    "surface-container": "#0c2419",
+                    "on-primary-fixed-variant": "#064e3b",
+                    "on-tertiary-fixed-variant": "#78590b",
+                    "on-error-container": "#fecaca",
+                    "surface-variant": "#14352a",
+                    "error-container": "#991b1b"
+                },
+                confettiColors: ['#10b981', '#f59e0b', '#fbbf24', '#34d399'],
+            },
+        };
+
+        let currentTheme = localStorage.getItem('wq-theme') || 'nebula';
+
+        function applyTheme(themeName) {
+            const theme = THEMES[themeName];
+            if (!theme) return;
+            currentTheme = themeName;
+            localStorage.setItem('wq-theme', themeName);
+
+            const root = document.documentElement;
+
+            // Set RGB triplet CSS variables for all Tailwind colors
+            Object.entries(theme.tailwind).forEach(([key, hex]) => {
+                root.style.setProperty('--c-' + key, hexToRgb(hex));
+            });
+
+            // Apply non-Tailwind CSS variables
+            Object.entries(theme.cssVars).forEach(([k, v]) => root.style.setProperty(k, v));
+
+            // Update navigation UI active states (inline styles to avoid dynamic class issues)
+            const navLinks = $$('header nav a');
+            navLinks.forEach(link => {
+                const linkTheme = link.textContent.trim().toLowerCase();
+                if (linkTheme === themeName) {
+                    link.className = 'pb-1 transition-all duration-300';
+                    link.style.color = 'var(--accent-color)';
+                    link.style.borderBottom = '2px solid var(--accent-color)';
+                } else {
+                    link.className = 'text-on-surface/70 hover:text-on-surface transition-all duration-300';
+                    link.style.color = '';
+                    link.style.borderBottom = '';
+                }
+            });
+
+            // Update dropdown button states
+            const dropdownBtns = $$('#theme-dropdown-options button');
+            dropdownBtns.forEach(btn => {
+                const btnTheme = btn.dataset.theme;
+                if (btnTheme === themeName) {
+                    btn.className = 'w-full text-left px-3 py-2 rounded-lg bg-primary/10 text-primary-fixed text-sm';
+                } else {
+                    btn.className = 'w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-sm';
+                }
+            });
+
+            // Update theme label
+            const themeLabel = $('#theme-label');
+            if (themeLabel) themeLabel.textContent = 'Theme: ' + theme.label;
+
+            // Update particles
+            updateParticleColors(theme.cssVars['--particle-color-1'], theme.cssVars['--particle-color-2']);
+        }
+
+        function updateParticleColors(c1, c2) {
+            const particles = $$('#particles div');
+            particles.forEach((p, i) => {
+                p.style.backgroundColor = i % 2 === 0 ? c1 : c2;
+            });
+        }
+
+        function initThemeListeners() {
+            // Nav links
+            $$('header nav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const themeName = link.textContent.trim().toLowerCase();
+                    if (THEMES[themeName]) applyTheme(themeName);
+                });
+            });
+
+            // Theme dropdown toggle (click-based for mobile support)
+            const dropdownBtn = $('#theme-dropdown-btn');
+            const dropdownMenu = $('#theme-dropdown-menu');
+            if (dropdownBtn && dropdownMenu) {
+                dropdownBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('show');
+                });
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+            }
+
+            // Dropdown theme buttons
+            $$('#theme-dropdown-options button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const themeName = btn.dataset.theme;
+                    if (THEMES[themeName]) {
+                        applyTheme(themeName);
+                        if (dropdownMenu) dropdownMenu.classList.remove('show');
+                    }
+                });
+            });
+        }
+
+        /* =========================================================
+           GAME LOGIC
+           ========================================================= */
+        const screens = {
+            start: $('#start-screen'),
+            game: $('#game-screen'),
+            win: $('#win-screen'),
+        };
+
+        const els = {
+            startTitle: $('#start-title'),
+            targetTitle: $('#target-title'),
+            startBtn: $('#start-btn'),
+            newArticlesBtn: $('#new-articles-btn'),
+            sidebarNewGameBtn: $('#sidebar-new-game-btn'),
+            fabPlay: $('#fab-play'),
+            backBtn: $('#back-btn'),
+            currentTitle: $('#current-article-title'),
+            gameTargetTitle: $('#game-target-title'),
+            clickCount: $('#click-count'),
+            timer: $('#timer'),
+            pathItems: $('#path-items'),
+            articleContent: $('#article-content'),
+            loadingOverlay: $('#loading-overlay'),
+            winClicks: $('#win-clicks'),
+            winTime: $('#win-time'),
+            winPathItems: $('#win-path-items'),
+            playAgainBtn: $('#play-again-btn'),
+            confettiBurst: $('#confetti-burst'),
+        };
+
+        let state = {
+            startArticle: '',
+            targetArticle: '',
+            currentArticle: '',
+            clicks: 0,
+            path: [],
+            timerInterval: null,
+            startTime: 0,
+            elapsed: 0,
+        };
+
+        function init() {
+            createParticles();
+            initThemeListeners();
+            applyTheme(currentTheme);
+            fetchNewArticles();
+
+            els.startBtn.addEventListener('click', startGame);
+            els.fabPlay.addEventListener('click', () => {
+                if (!els.startBtn.disabled && screens.start.classList.contains('active')) startGame();
+            });
+            els.newArticlesBtn.addEventListener('click', fetchNewArticles);
+            els.sidebarNewGameBtn.addEventListener('click', quitGame);
+            els.backBtn.addEventListener('click', quitGame);
+            els.playAgainBtn.addEventListener('click', playAgain);
+        }
+
+        function showScreen(name) {
+            Object.values(screens).forEach((s) => s.classList.remove('active'));
+            screens[name].classList.add('active');
+            window.scrollTo(0, 0);
+            
+            // Toggle FAB visibility
+            if (name === 'start') els.fabPlay.style.display = 'flex';
+            else els.fabPlay.style.display = 'none';
+        }
+
+        function createParticles() {
+            const container = $('#particles');
+            for (let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'absolute w-1 h-1 rounded-full opacity-20 pointer-events-none';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.top = Math.random() * 100 + '%';
+                p.style.backgroundColor = i % 2 === 0 ? '#ab8ffe' : '#64a8fe';
+                container.appendChild(p);
+            }
+        }
+
+        async function apiFetch(params) {
+            const url = new URL(API_BASE);
+            const defaults = { format: 'json', origin: '*' };
+            Object.entries({ ...defaults, ...params }).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`API request failed: ${res.status}`);
+            return res.json();
+        }
+
+        async function getRandomArticles(count = 2) {
+            const data = await apiFetch({
+                action: 'query',
+                list: 'random',
+                rnnamespace: 0,
+                rnlimit: count,
+            });
+            if (!data.query || !data.query.random) throw new Error('Invalid API response');
+            return data.query.random.map((a) => a.title);
+        }
+
+        async function getArticleHTML(title) {
+            const data = await apiFetch({
+                action: 'parse',
+                page: title,
+                prop: 'text|displaytitle',
+                disableeditsection: 1,
+                redirects: 1,
+            });
+            if (!data.parse) throw new Error('Article not found');
+            return {
+                title: data.parse.title,
+                html: data.parse.text['*'],
+            };
+        }
+
+        let fetchRetryCount = 0;
+        const MAX_FETCH_RETRIES = 3;
+
+        async function fetchNewArticles() {
+            els.startBtn.disabled = true;
+            els.startTitle.textContent = 'Seeking article...';
+            els.targetTitle.textContent = 'Seeking destination...';
+
+            try {
+                const [start, target] = await getRandomArticles(2);
+                state.startArticle = start;
+                state.targetArticle = target;
+                els.startTitle.textContent = start;
+                els.targetTitle.textContent = target;
+                els.startBtn.disabled = false;
+                fetchRetryCount = 0; // Reset on success
+            } catch (err) {
+                console.error('Failed to fetch articles:', err);
+                fetchRetryCount++;
+                if (fetchRetryCount < MAX_FETCH_RETRIES) {
+                    els.startTitle.textContent = `Signal Lost (retry ${fetchRetryCount}/${MAX_FETCH_RETRIES})...`;
+                    els.targetTitle.textContent = 'Reconnecting...';
+                    setTimeout(fetchNewArticles, 3000);
+                } else {
+                    els.startTitle.textContent = 'Connection Failed';
+                    els.targetTitle.textContent = 'Click Re-route to try again';
+                    fetchRetryCount = 0; // Reset so manual retry works
+                }
+            }
+        }
+
+        async function startGame() {
+            if (!state.startArticle || !state.targetArticle) return;
+
+            state.clicks = 0;
+            state.path = [state.startArticle];
+            state.elapsed = 0;
+
+            els.clickCount.textContent = '0';
+            els.timer.textContent = '0:00';
+            els.gameTargetTitle.textContent = state.targetArticle;
+            renderPath();
+
+            showScreen('game');
+            await navigateToArticle(state.startArticle, false);
+
+            state.startTime = Date.now();
+            state.timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        async function navigateToArticle(title, countClick = true) {
+            showLoading(true);
+            try {
+                const { title: resolvedTitle, html } = await getArticleHTML(title);
+                state.currentArticle = resolvedTitle;
+
+                if (countClick) {
+                    state.clicks++;
+                    els.clickCount.textContent = state.clicks;
+                    if (state.path[state.path.length - 1] !== resolvedTitle) {
+                        state.path.push(resolvedTitle);
+                    }
+                    renderPath();
+                }
+
+                els.currentTitle.textContent = resolvedTitle;
+                renderArticle(html);
+
+                // Guard: only check win if target is set (prevents "" === "" instant win)
+                if (state.targetArticle && normalizeTitle(resolvedTitle) === normalizeTitle(state.targetArticle)) {
+                    win();
+                }
+            } catch (err) {
+                console.error('Navigation error:', err);
+                els.articleContent.innerHTML = `<p class='text-error p-8'>Critical Error: Failed to retrieve data. <button onclick="location.reload()" class="underline">Retry</button></p>`;
+            }
+            showLoading(false);
+        }
+
+        function normalizeTitle(t) {
+            return t.toLowerCase().replace(/_/g, ' ').trim();
+        }
+
+        function renderArticle(html) {
+            els.articleContent.innerHTML = html;
+            els.articleContent.querySelectorAll('a').forEach((a) => {
+                const href = a.getAttribute('href') || '';
+                if (href.startsWith('/wiki/') && !href.includes(':') && !href.includes('#')) {
+                    const articleName = decodeURIComponent(href.replace('/wiki/', ''));
+                    a.removeAttribute('href');
+                    a.style.cursor = 'pointer';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        navigateToArticle(articleName);
+                    });
+                } else {
+                    a.removeAttribute('href');
+                    a.classList.add('disabled-link');
+                }
+            });
+            els.articleContent.scrollTop = 0;
+            window.scrollTo(0, 0);
+        }
+
+        function renderPath() {
+            els.pathItems.innerHTML = '';
+            state.path.forEach((title, i) => {
+                const item = document.createElement('div');
+                item.className = "flex items-center gap-2 shrink-0";
+                
+                const isLast = i === state.path.length - 1;
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${isLast ? 'bg-primary/20 border border-primary/30' : 'bg-surface-container-highest border border-outline-variant/20'}">
+                        <span class="text-[10px] font-bold ${isLast ? 'text-primary' : 'text-on-surface-variant'}">${i + 1}</span>
+                        <span class="text-xs ${isLast ? 'text-primary font-semibold' : 'text-on-surface-variant'} max-w-[120px] truncate">${title}</span>
+                    </div>
+                `;
+
+                if (i < state.path.length - 1) {
+                    const arrow = document.createElement('span');
+                    arrow.className = "material-symbols-outlined text-xs text-on-surface-variant/50 shrink-0";
+                    arrow.textContent = "arrow_forward";
+                    item.appendChild(arrow);
+                }
+
+                els.pathItems.appendChild(item);
+            });
+            // Auto-scroll to the end of the path
+            els.pathItems.parentElement.scrollLeft = els.pathItems.parentElement.scrollWidth;
+        }
+
+        function updateTimer() {
+            state.elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+            els.timer.textContent = formatTime(state.elapsed);
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function showLoading(visible) {
+            els.loadingOverlay.classList.toggle('visible', visible);
+        }
+
+        function win() {
+            clearInterval(state.timerInterval);
+            els.winClicks.textContent = state.clicks;
+            els.winTime.textContent = formatTime(state.elapsed);
+            
+            els.winPathItems.innerHTML = '';
+            state.path.forEach((title, i) => {
+                const span = document.createElement('span');
+                span.className = "px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary-fixed";
+                span.textContent = title;
+                els.winPathItems.appendChild(span);
+                if (i < state.path.length - 1) {
+                    const arrow = document.createElement('span');
+                    arrow.className = "material-symbols-outlined text-xs text-on-surface-variant";
+                    arrow.textContent = "arrow_forward";
+                    els.winPathItems.appendChild(arrow);
+                }
+            });
+
+            spawnConfetti();
+            showScreen('win');
+        }
+
+        function spawnConfetti() {
+            els.confettiBurst.innerHTML = '';
+            const theme = THEMES[currentTheme];
+            const colors = theme ? theme.confettiColors : ['#ab8ffe', '#64a8fe', '#6bffc1', '#ff6e84'];
+            for (let i = 0; i < 60; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + '%';
+                piece.style.top = '-10%';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = (Math.random() * 0.8) + 's';
+                piece.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+                els.confettiBurst.appendChild(piece);
+            }
+        }
+
+        function quitGame() {
+            clearInterval(state.timerInterval);
+            showScreen('start');
+            fetchNewArticles();
+        }
+
+        function playAgain() {
+            clearInterval(state.timerInterval);
+            showScreen('start');
+            fetchNewArticles();
+        }
+
+        init();
+    })();
+</script>
+</body></html>
